@@ -1,14 +1,23 @@
 export interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  avatarUrl?: string;
-  role: UserRole;
+  avatar?: string;
+  avatarUrl?: string; // For backward compatibility
+  role: UserRole | string;
   department?: string;
   position?: string;
-  status: UserStatus;
+  status?: UserStatus;
   lastActive?: string;
-  preferences: UserPreferences;
+  lastLogin?: string;
+  createdAt: string;
+  preferences?: UserPreferences;
+}
+
+// Helper function to get full name
+export function getFullName(user: User): string {
+  return `${user.firstName} ${user.lastName}`;
 }
 
 export enum UserRole {
@@ -32,6 +41,7 @@ export interface UserPreferences {
   timeFormat: '12h' | '24h';
   autoSave: boolean;
   showPresence: boolean;
+  storageLocation: 'local' | 'indexedDB' | 'cloud';
 }
 
 export interface UserPresence {

@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import {
@@ -10,16 +10,24 @@ import {
   UserGroupIcon,
   Cog6ToothIcon,
   BellIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  FolderIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
+import { getFullName, UserRole } from '@/types/user';
 
-const navigation = [
+const baseNavigation = [
   { name: 'Dashboard', href: '/', icon: HomeIcon },
   { name: 'Documents', href: '/documents', icon: DocumentTextIcon },
+  { name: 'Files', href: '/files', icon: FolderIcon },
   { name: 'Templates', href: '/templates', icon: DocumentDuplicateIcon },
   { name: 'Team', href: '/team', icon: UserGroupIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon }
+];
+
+const adminNavigation = [
+  { name: 'Admin', href: '/admin', icon: ShieldCheckIcon }
 ];
 
 const userNavigation = [
@@ -31,6 +39,7 @@ const userNavigation = [
 export default function Layout() {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [navigation, setNavigation] = useState(baseNavigation);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -38,6 +47,15 @@ export default function Layout() {
     logout();
     navigate('/login');
   };
+  
+  // Update navigation based on user role
+  useEffect(() => {
+    if (user && user.role === UserRole.ADMIN) {
+      setNavigation([...baseNavigation, ...adminNavigation]);
+    } else {
+      setNavigation(baseNavigation);
+    }
+  }, [user]);
   
   return (
     <div className="h-screen flex overflow-hidden bg-white">
@@ -53,7 +71,7 @@ export default function Layout() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 bg-neutral-600 bg-opacity-75" />
+            <div className="fixed inset-0 bg-neutral-600 bg-opacity-75" />
           </Transition.Child>
           <Transition.Child
             as={Fragment}
@@ -126,12 +144,12 @@ export default function Layout() {
                       <div>
                         <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-neutral-600">
                           <span className="text-sm font-medium leading-none text-white">
-                            {user.name.charAt(0)}
+                            {user.firstName.charAt(0)}
                           </span>
                         </span>
                       </div>
                       <div className="ml-3">
-                        <p className="text-base font-medium text-white">{user.name}</p>
+                        <p className="text-base font-medium text-white">{getFullName(user)}</p>
                         <p className="text-sm font-medium text-neutral-400 group-hover:text-neutral-300">
                           {user.email}
                         </p>
@@ -193,12 +211,12 @@ export default function Layout() {
                     <div>
                       <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-neutral-600">
                         <span className="text-sm font-medium leading-none text-white">
-                          {user.name.charAt(0)}
+                          {user.firstName.charAt(0)}
                         </span>
                       </span>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm font-medium text-white">{user.name}</p>
+                      <p className="text-sm font-medium text-white">{getFullName(user)}</p>
                       <p className="text-xs font-medium text-neutral-400 group-hover:text-neutral-300">
                         {user.email}
                       </p>
